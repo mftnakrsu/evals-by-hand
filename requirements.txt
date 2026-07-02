@@ -1,0 +1,15 @@
+# evals-by-hand — dependencies. Loose, protective bounds only.
+#
+# EVERY part runs offline with NO API key and NO framework: pure Python + NumPy
+# is the reproducible default. The LLM-as-judge parts default to a deterministic
+# mock judge; a real provider is one env flag away via a swappable generate().
+
+numpy>=1.24               # the only hard dependency; all metrics/tests are hand-derived on top of it
+
+# Optional — only to CHECK a hand-derived value against a library (never to compute it):
+scipy>=1.10               # e.g. verify a McNemar / bootstrap result
+
+# Optional "real judge" path — pick ONE provider (all optional):
+openai>=1.0,<2            # hosted; the default real generate()
+anthropic                 # hosted; the Claude variant
+requests>=2.28            # only for a local Ollama generation path
