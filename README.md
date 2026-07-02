@@ -36,7 +36,7 @@ with a real provider one env flag away via a single swappable `generate()`.
 ## Quick start
 
 ```bash
-# from the repo root; no dependencies, no API key, no network
+# from the repo root; offline, no API key, no network (Part 1 needs only the standard library)
 python3 part-01-what-is-a-score/scoring_basics.py
 ```
 
