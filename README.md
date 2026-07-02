@@ -32,6 +32,20 @@ with a real provider one env flag away via a single swappable `generate()`.
 | Part | Topic | Code | Notebook | Essay |
 |---|---|---|---|---|
 | 1 | What Is a Score? metrics and the confusion matrix by hand | [scoring_basics.py](part-01-what-is-a-score/scoring_basics.py) | [notebook](part-01-what-is-a-score/scoring_basics.ipynb) | [read](https://www.mefby.com/essays/what-is-a-score) |
+| 2 | Building a Golden Set: sampling, stratification, leakage, rubrics | [golden_set.py](part-02-building-a-golden-set/golden_set.py) | [notebook](part-02-building-a-golden-set/golden_set.ipynb) | [read](https://www.mefby.com/essays/building-a-golden-set) |
+| 3 | Do Humans Even Agree? Cohen's and Fleiss' kappa by hand | [agreement.py](part-03-annotator-agreement/agreement.py) | [notebook](part-03-annotator-agreement/agreement.ipynb) | [read](https://www.mefby.com/essays/annotator-agreement) |
+| 4 | LLM-as-Judge by Hand: rubric, parsing, the judge confusion matrix | [llm_judge.py](part-04-llm-as-judge/llm_judge.py) | [notebook](part-04-llm-as-judge/llm_judge.ipynb) | [read](https://www.mefby.com/essays/llm-as-judge) |
+| 5 | Judging the Judge: position, verbosity, self-preference bias | [judge_bias.py](part-05-judging-the-judge/judge_bias.py) | [notebook](part-05-judging-the-judge/judge_bias.ipynb) | [read](https://www.mefby.com/essays/judging-the-judge) |
+| 6 | Uncertainty: bootstrap confidence intervals by hand | [bootstrap_ci.py](part-06-bootstrap-uncertainty/bootstrap_ci.py) | [notebook](part-06-bootstrap-uncertainty/bootstrap_ci.ipynb) | [read](https://www.mefby.com/essays/bootstrap-uncertainty) |
+| 7 | Is the Difference Real? McNemar, paired tests, and power | [significance.py](part-07-significance-testing/significance.py) | [notebook](part-07-significance-testing/significance.ipynb) | [read](https://www.mefby.com/essays/significance-testing) |
+| 8 | pass@k: deriving the unbiased estimator | [pass_at_k.py](part-08-pass-at-k/pass_at_k.py) | [notebook](part-08-pass-at-k/pass_at_k.ipynb) | [read](https://www.mefby.com/essays/pass-at-k) |
+| 9 | Arenas: Elo and Bradley-Terry by hand | [arenas.py](part-09-arenas-elo-bradley-terry/arenas.py) | [notebook](part-09-arenas-elo-bradley-terry/arenas.ipynb) | [read](https://www.mefby.com/essays/arenas-elo-bradley-terry) |
+| 10 | Calibration: reliability curves, ECE, and Brier score | [calibration.py](part-10-calibration/calibration.py) | [notebook](part-10-calibration/calibration.ipynb) | [read](https://www.mefby.com/essays/calibration) |
+| 11 | Regression Gates: CI gates, contamination, and drift | [regression_gates.py](part-11-regression-gates/regression_gates.py) | [notebook](part-11-regression-gates/regression_gates.ipynb) | [read](https://www.mefby.com/essays/regression-gates) |
+| 12 | The Eval Flywheel: mining production logs into eval sets | [flywheel.py](part-12-eval-flywheel/flywheel.py) | [notebook](part-12-eval-flywheel/flywheel.ipynb) | [read](https://www.mefby.com/essays/eval-flywheel) |
+| 13 | Online Evals: A/B tests and guardrail metrics | [online_evals.py](part-13-online-evals/online_evals.py) | [notebook](part-13-online-evals/online_evals.ipynb) | [read](https://www.mefby.com/essays/online-evals) |
+| 14 | Agent-Trajectory Evals: grading the path, not just the answer | [trajectory_evals.py](part-14-agent-trajectory-evals/trajectory_evals.py) | [notebook](part-14-agent-trajectory-evals/trajectory_evals.ipynb) | [read](https://www.mefby.com/essays/agent-trajectory-evals) |
+| 15 | A Tiny Eval Harness: dataset, metric, judge, CI, gate | [eval_harness.py](part-15-eval-harness/eval_harness.py) | [notebook](part-15-eval-harness/eval_harness.ipynb) | [read](https://www.mefby.com/essays/eval-harness) |
 
 ## Quick start
 
