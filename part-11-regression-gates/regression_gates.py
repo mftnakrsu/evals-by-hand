@@ -9,9 +9,13 @@ or block. A regression gate is three cheap checks run before a deploy:
      confidence interval clears the bar. A point estimate above the line is
      not enough; the interval has to clear it too.
   2. CONTAMINATION   — an n-gram overlap check that flags an eval item that
-     leaked into the training data (a leaked item inflates the score).
+     leaked into the training data (a leaked item inflates the score). This
+     one is a PRE-FILTER on the eval set, not a vote: flagged items are
+     dropped and the runs re-scored before checks 1 and 3 decide.
   3. DRIFT           — compare the score DISTRIBUTIONS of two runs, not just
      their means, so a shift is caught even when the averages look close.
+
+Checks 1 and 3 each hold a veto; contamination only cleans what they see.
 
 We run all three on two candidate runs of the same tiny eval set: run A
 (a clear pass) and run B (an ambiguous one that games the point estimate).
@@ -115,6 +119,8 @@ if __name__ == "__main__":
     print("  the bar but its CI reaches below it, so the gate refuses to ship.")
 
     # ---- Check 2: contamination (n-gram overlap) -------------------------
+    # A pre-filter on the eval set, not a vote on the run: flagged items are
+    # dropped before the gate decides (see the verdict below).
     N = 3   # word trigrams
     train_docs = [
         "the capital of france is the city of paris",
@@ -163,6 +169,11 @@ if __name__ == "__main__":
     print(f"  PSI = sum (pA-pB)*ln(pA/pB) = {drift:.3f}  -> {drift_tag}")
 
     # ---- The gate's verdict ----------------------------------------------
+    # Only checks 1 and 3 vote, and either one can veto. Contamination is a
+    # pre-filter: in a real gate it runs first, any flagged item (E1 above)
+    # is dropped, and the runs are re-scored on what is left. Here the
+    # four-question scan stands apart from the 20-item runs, so dropping E1
+    # changes none of the numbers below.
     ship = verdicts["B"] and (drift <= 0.25)
     print("\n" + line)
     print("GATE VERDICT on candidate B (the run we were about to deploy):")
