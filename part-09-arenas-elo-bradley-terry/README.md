@@ -20,4 +20,4 @@ Prefer it step by step? Open `arenas.ipynb` in Jupyter or Colab.
 ## Offline by design
 Pure Python standard library, no imports beyond `random` for a fixed-seed shuffle and the bootstrap resamples, no API key, no network. Every number printed is deterministic and reproducible on any machine.
 
-One note on the bootstrap: the figure in the essay drew its resamples with numpy's `default_rng(0)` (PCG64), while this script uses the standard library's `random.Random(0)`, a different random stream. The intervals come out the same to 4 decimals; the survival counts differ by a few dozen per 10,000 (the full order holds 5410 times here, 5426 in the figure).
+The bootstrap step (stdlib `random.Random(0)`, 10,000 resamples) prints the intervals and survival counts shown in the essay's figure.

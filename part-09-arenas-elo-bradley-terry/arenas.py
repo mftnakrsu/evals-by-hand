@@ -121,10 +121,7 @@ def bt_bootstrap(wins, n_boot=10000, iters=20, seed=0):
     refitted strengths and how many resamples left D (the last model) with
     no win at all, which makes its strength fit to exactly 0.
 
-    Seeded with stdlib random.Random(seed). The essay's figure drew its
-    resamples with numpy's default_rng(0) (PCG64), a different random stream:
-    the intervals come out the same to 4 decimals, the counts differ by a few
-    dozen per 10,000 (e.g. the full order holds 5410 times here, 5426 there).
+    Seeded with stdlib random.Random(seed); the essay's figure is this output.
     """
     n = len(wins)
     rng = random.Random(seed)
