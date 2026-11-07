@@ -39,7 +39,8 @@ QA = [
 ]
 
 # An agent-trajectory set: for each task, the GOLD sequence of tool calls and
-# the agent's ACTUAL sequence. We score how much of the path lined up (Part 14).
+# the agent's ACTUAL sequence. We score how much of the path lined up, slot by
+# slot (a simpler, positional cousin of Part 14's step-level credit).
 TRAJ = [
     {"task": "answer from a doc",   "gold": ["search", "read", "answer"],
                                      "pred": ["search", "read", "answer"]},
@@ -78,8 +79,12 @@ def mock_judge(rec):
 
 
 def trajectory_match(rec):
-    """Step-level credit (Part 14): the fraction of positions where the gold
-    and predicted tool calls agree, penalized by any length mismatch."""
+    """A simpler, positional cousin of Part 14's step-level credit: the
+    fraction of positions where the gold and predicted tool calls agree,
+    divided by the longer sequence so an extra or missing step is penalized.
+    Part 14 aligned the paths with a longest common subsequence first; this
+    compares them slot by slot, so one inserted step shifts every later step
+    and is over-penalized ('quick lookup' scores 0.33 here, 0.67 with LCS)."""
     gold, pred = rec["gold"], rec["pred"]
     matches = sum(1 for i in range(min(len(gold), len(pred))) if gold[i] == pred[i])
     return matches / max(len(gold), len(pred))
