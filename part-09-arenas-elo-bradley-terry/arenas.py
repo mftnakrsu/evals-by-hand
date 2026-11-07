@@ -13,7 +13,11 @@ one ranking. We do it two ways by hand on the SAME four chatbots (A, B, C, D):
      the aggregate win matrix, so it has no notion of order: the ranking it
      converges to is ORDER-INDEPENDENT.
 
-Pure Python, offline, deterministic. Any shuffle uses a fixed seed.
+  3. Bootstrap — how sure is that ranking? Resample each pair's 3 battles
+     with replacement 10,000 times, refit Bradley-Terry each time, and read
+     the 95% interval of every strength plus how often the order survives.
+
+Pure Python, offline, deterministic. Any shuffle or resample uses a fixed seed.
 """
 
 import random
@@ -96,6 +100,49 @@ def bt_fit(wins, iters=20):
     return p, snapshots
 
 
+# --- 3. Bootstrap intervals for the Bradley-Terry fit ----------------------
+def percentile(xs, q):
+    """q-th percentile with linear interpolation between order statistics
+    (the same rule as numpy's default)."""
+    xs = sorted(xs)
+    pos = q / 100.0 * (len(xs) - 1)
+    lo = int(pos)
+    if lo + 1 >= len(xs):
+        return xs[-1]
+    return xs[lo] + (xs[lo + 1] - xs[lo]) * (pos - lo)
+
+
+def bt_bootstrap(wins, n_boot=10000, iters=20, seed=0):
+    """
+    Resample the arena n_boot times and refit Bradley-Terry on each copy.
+    One resample keeps the round-robin design: for every pair, redraw its
+    battles (3 here) with replacement from that pair's own record, rebuild
+    the win matrix, refit with the same MM iterations. Returns the list of
+    refitted strengths and how many resamples left D (the last model) with
+    no win at all, which makes its strength fit to exactly 0.
+
+    Seeded with stdlib random.Random(seed). The essay's figure drew its
+    resamples with numpy's default_rng(0) (PCG64), a different random stream:
+    the intervals come out the same to 4 decimals, the counts differ by a few
+    dozen per 10,000 (e.g. the full order holds 5410 times here, 5426 there).
+    """
+    n = len(wins)
+    rng = random.Random(seed)
+    pair_games = [[(i, j)] * wins[i][j] + [(j, i)] * wins[j][i]
+                  for i in range(n) for j in range(i + 1, n)]
+    fits, last_winless = [], 0
+    for _ in range(n_boot):
+        w = [[0] * n for _ in range(n)]
+        for games in pair_games:
+            for winner, loser in rng.choices(games, k=len(games)):
+                w[winner][loser] += 1
+        if sum(w[n - 1]) == 0:
+            last_winless += 1
+        p, _ = bt_fit(w, iters)
+        fits.append(p)
+    return fits, last_winless
+
+
 def ranking(scores):
     """Return model letters ordered best-first by score."""
     order = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
@@ -162,6 +209,36 @@ if __name__ == "__main__":
     print(f"  P(B beats C) = pB/(pB+pC) = {p[1] / (p[1] + p[2]):.3f}")
     print("  -> No order anywhere: BT reads only the totals, so its ranking is")
     print("     the same no matter how the battles were shuffled.")
+
+    # -- Bootstrap: how much of that ranking would survive a re-run? -------
+    n_boot = 10000
+    print("\n" + "-" * 72)
+    print(f"BOOTSTRAP: {n_boot} resamples (seed 0), each pair's 3 battles redrawn")
+    print("with replacement, Bradley-Terry refit with the same 20 MM iterations.")
+    print("-" * 72)
+    fits, d_winless = bt_bootstrap(WINS, n_boot=n_boot, iters=20, seed=0)
+    lo = [percentile([f[k] for f in fits], 2.5) for k in range(len(MODELS))]
+    hi = [percentile([f[k] for f in fits], 97.5) for k in range(len(MODELS))]
+    print("  strength at it 20, with its 95% interval (2.5th to 97.5th pct):")
+    for k, m in enumerate(MODELS):
+        print(f"    {m}  {p[k]:.4f}  [{lo[k]:.4f}, {hi[k]:.4f}]")
+    print(f"  D won no battle in {d_winless} of {n_boot} resamples, so its "
+          "strength fits to 0.")
+
+    print(f"\n  does the order survive? (out of {n_boot} refits)")
+    survival = [
+        ("A > B > C > D, all of it", sum(f[0] > f[1] > f[2] > f[3] for f in fits)),
+        ("A on top", sum(f[0] == max(f) for f in fits)),
+        ("B above A", sum(f[1] > f[0] for f in fits)),
+        ("C above B", sum(f[2] > f[1] for f in fits)),
+        ("D above C", sum(f[3] > f[2] for f in fits)),
+    ]
+    for name, count in survival:
+        print(f"    {name:<26}{count:>6}")
+    overlap = all(lo[k] < hi[k + 1] for k in range(len(MODELS) - 1))
+    print(f"  every neighboring pair of intervals overlaps: {overlap}")
+    print("  -> Three battles per pair are enough to fit a ranking, not to")
+    print("     trust it. Print the intervals beside the point estimates.")
     print(line)
 
 # Expected output:
@@ -207,4 +284,25 @@ if __name__ == "__main__":
 #   P(B beats C) = pB/(pB+pC) = 0.821
 #   -> No order anywhere: BT reads only the totals, so its ranking is
 #      the same no matter how the battles were shuffled.
+#
+# ------------------------------------------------------------------------
+# BOOTSTRAP: 10000 resamples (seed 0), each pair's 3 battles redrawn
+# with replacement, Bradley-Terry refit with the same 20 MM iterations.
+# ------------------------------------------------------------------------
+#   strength at it 20, with its 95% interval (2.5th to 97.5th pct):
+#     A  0.7015  [0.2327, 0.9307]
+#     B  0.2314  [0.0244, 0.7005]
+#     C  0.0506  [0.0015, 0.1943]
+#     D  0.0164  [0.0000, 0.0638]
+#   D won no battle in 2996 of 10000 resamples, so its strength fits to 0.
+#
+#   does the order survive? (out of 10000 refits)
+#     A > B > C > D, all of it    5410
+#     A on top                    8985
+#     B above A                   1015
+#     C above B                    457
+#     D above C                   1038
+#   every neighboring pair of intervals overlaps: True
+#   -> Three battles per pair are enough to fit a ranking, not to
+#      trust it. Print the intervals beside the point estimates.
 # ========================================================================
